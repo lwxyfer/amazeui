@@ -17,6 +17,8 @@ UI.VERSION = '{{VERSION}}';
 
 UI.support = {};
 
+
+// 唯一的transiton完成后的事件,就可以实现回调产生动画
 UI.support.transition = (function() {
   var transitionEnd = (function() {
     // https://developer.mozilla.org/en-US/docs/Web/Events/transitionend#Browser_compatibility
@@ -35,9 +37,11 @@ UI.support.transition = (function() {
     }
   })();
 
-  return transitionEnd && {end: transitionEnd};
+  return transitionEnd && {end: transitionEnd};   // 并不是返回boolean，这个逻辑与很有趣
 })();
 
+
+// animationstart animationend animationiteration 动画的事件
 UI.support.animation = (function() {
   var animationEnd = (function() {
     var element = doc.body || doc.documentElement;
@@ -58,6 +62,7 @@ UI.support.animation = (function() {
   return animationEnd && {end: animationEnd};
 })();
 
+// 触摸事件
 /* eslint-disable dot-notation */
 UI.support.touch = (
 ('ontouchstart' in window &&
@@ -71,6 +76,7 @@ false);
 /* eslint-enable dot-notation */
 
 // https://developer.mozilla.org/zh-CN/docs/DOM/MutationObserver
+// MutationObserver provides developers a way to react to changes in a DOM
 UI.support.mutationobserver = (window.MutationObserver ||
 window.WebKitMutationObserver || null);
 
@@ -80,6 +86,8 @@ UI.support.formValidation = (typeof document.createElement('form').
 
 UI.utils = {};
 
+
+// 防抖动 、 节流函数
 /**
  * Debounce function
  *
@@ -113,6 +121,7 @@ UI.utils.debounce = function(func, wait, immediate) {
   };
 };
 
+// 判断是否在视口中
 UI.utils.isInView = function(element, options) {
   var $element = $(element);
   var visible = !!($element.width() || $element.height()) &&
@@ -128,7 +137,7 @@ UI.utils.isInView = function(element, options) {
   var left = offset.left;
   var top = offset.top;
 
-  options = $.extend({topOffset: 0, leftOffset: 0}, options);
+  options = $.extend({topOffset: 0, leftOffset: 0}, options);  // extend
 
   return (top + $element.height() >= windowTop &&
   top - options.topOffset <= windowTop + $win.height() &&
@@ -148,7 +157,7 @@ UI.utils.parseOptions = UI.utils.options = function(string) {
     try {
       options = (new Function('',
         'var json = ' + string.substr(start) +
-        '; return JSON.parse(JSON.stringify(json));'))();
+        '; return JSON.parse(JSON.stringify(json));'))();  // 这一块的内容
     } catch (e) {
     }
   }
@@ -156,17 +165,20 @@ UI.utils.parseOptions = UI.utils.options = function(string) {
   return options;
 };
 
+// 哈哈，真是个好方法，用来生成随机数
 UI.utils.generateGUID = function(namespace) {
   var uid = namespace + '-' || 'am-';
 
   do {
     uid += Math.random().toString(36).substring(2, 7);
+    // Number.prototype.toString()  与 Object.prototype.toString() 的不同
   } while (document.getElementById(uid));
 
   return uid;
 };
 
 // @see https://davidwalsh.name/get-absolute-url
+// http://stackoverflow.com/questions/2005079/absolute-vs-relative-urls 比较
 UI.utils.getAbsoluteUrl = (function() {
   var a;
 
@@ -293,6 +305,7 @@ $.fn.transitionEnd = function(callback) {
   return this;
 };
 
+// 移除匹配的class ： 可以trigger， 用来addClass
 $.fn.removeClassRegEx = function() {
   return this.each(function(regex) {
     var classes = $(this).attr('class');
@@ -301,7 +314,7 @@ $.fn.removeClassRegEx = function() {
       return false;
     }
 
-    var classArray = [];
+    var classArray = []; // 空数组保存 不匹配的类名
     classes = classes.split(' ');
 
     for (var i = 0, len = classes.length; i < len; i++) {
@@ -342,6 +355,7 @@ $.fn.alterClass = function(removals, additions) {
   return !additions ? self : self.addClass(additions);
 };
 
+// 做帧动画的处理，动画处理
 // handle multiple browsers for requestAnimationFrame()
 // http://www.paulirish.com/2011/requestanimationframe-for-smart-animating/
 // https://github.com/gnarf/jquery-requestAnimationFrame
@@ -367,6 +381,7 @@ UI.utils.cancelAF = (function() {
     };
 })();
 
+// 好吧，这就是兼容性处理， 滚动体在win 和mac 上不一样大。
 // via http://davidwalsh.name/detect-scrollbar-width
 UI.utils.measureScrollbar = function() {
   if (document.body.clientWidth >= window.innerWidth) {
@@ -417,6 +432,7 @@ UI.utils.imageLoader = function($image, callback) {
 };
 
 /**
+ *  不明所以
  * @see https://github.com/cho45/micro-template.js
  * (c) cho45 http://cho45.github.com/mit-license
  */
@@ -499,7 +515,7 @@ UI.ready = function(callback) {
 };
 
 UI.DOMObserve = function(elements, options, callback) {
-  var Observer = UI.support.mutationobserver;
+  var Observer = UI.support.mutationobserver;  // dom change obsever 方法
   if (!Observer) {
     return;
   }
@@ -542,6 +558,8 @@ $.fn.DOMObserve = function(options, callback) {
   });
 };
 
+
+// 事件
 if (UI.support.touch) {
   $html.addClass('am-touch');
 }
@@ -559,6 +577,7 @@ $(document).on('changed.dom.amui', function(e) {
   });
 });
 
+// 事件初始化
 $(function() {
   var $body = $(document.body);
 
